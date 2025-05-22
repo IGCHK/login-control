@@ -21,7 +21,7 @@
     
     <div id="login-container">
       <h2>Admin Login</h2>
-      <input type="email" id="adminEmail" placeholder="Admin Email">
+      <input type="email" id="adminEmail" placeholder="Admin Email" value="igchkadmin@yourdomain.com">
       <input type="password" id="adminPassword" placeholder="Password">
       <button id="loginBtn">Login</button>
       <p id="login-error" style="color: red;"></p>
@@ -42,15 +42,21 @@
     </div>
   </div>
 
+  <!-- Firebase SDKs -->
   <script type="module">
-    // Admin Project (igchkadmin)
+    // Import required Firebase modules
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js';
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js';
+    import { getFirestore, collection, getDocs, doc, setDoc } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
+
+    // Admin Project (igchkadmin) - REPLACE WITH YOUR ACTUAL CONFIG
     const adminConfig = {
-      apiKey: "YOUR_IGCHKADMIN_API_KEY",
+      apiKey: "AIzaSyYourAdminApiKeyHere",
       authDomain: "igchkadmin.firebaseapp.com",
       projectId: "igchkadmin",
       storageBucket: "igchkadmin.appspot.com",
-      messagingSenderId: "YOUR_ADMIN_SENDER_ID",
-      appId: "YOUR_ADMIN_APP_ID"
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:abcdef123456"
     };
 
     // User Project (igchkwebsite - for Firestore access)
@@ -61,7 +67,7 @@
       storageBucket: "igchkwebsite.appspot.com"
     };
 
-    // Initialize both apps
+    // Initialize apps
     const adminApp = initializeApp(adminConfig, "admin");
     const userApp = initializeApp(userConfig, "user");
     
@@ -82,6 +88,7 @@
     loginBtn.addEventListener("click", async () => {
       const email = document.getElementById("adminEmail").value;
       const password = document.getElementById("adminPassword").value;
+      const errorEl = document.getElementById("login-error");
       
       try {
         const userCred = await signInWithEmailAndPassword(adminAuth, email, password);
@@ -91,15 +98,17 @@
           loadUsers();
         } else {
           await signOut(adminAuth);
-          showError("Access denied: Not an admin");
+          errorEl.textContent = "Access denied: Not an admin";
         }
       } catch (error) {
-        showError(error.message);
+        errorEl.textContent = error.message;
       }
     });
 
     // Load Users from igchkwebsite project
     async function loadUsers() {
+      userList.innerHTML = "<tr><td colspan='4'>Loading users...</td></tr>";
+      
       try {
         // Get all users from igchkwebsite project
         const idToken = await adminAuth.currentUser.getIdToken();
@@ -156,10 +165,6 @@
         adminContent.style.display = "none";
       }
     });
-
-    function showError(message) {
-      document.getElementById("login-error").textContent = message;
-    }
   </script>
 </body>
 </html>

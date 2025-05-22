@@ -1,39 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>IGC HK Control Login</title>
-<style>
-  body {
-    background-color: #fdf6a6;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 50px;
-  }
-  input[type="email"], input[type="password"] {
-    padding: 10px;
-    font-size: 1em;
-    margin: 10px 0;
-    width: 250px;
-  }
-  button {
-    padding: 10px 20px;
-    font-size: 1em;
-    cursor: pointer;
-  }
-  .header-images {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
-    gap: 20px;
-  }
-  img.logo, img.banner {
-    height: 120px;
-    width: auto;
-  }
-</style>
+  <title>IGC HK Login Page</title>
+  <style>
+    body {
+      background-color: #fdf6a6;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    /* Container for logo + banner side by side */
+    .header-images {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      gap: 20px;
+    }
+    img.logo, img.banner {
+      height: 120px;    /* same height */
+      width: auto;      /* keep aspect ratio */
+      vertical-align: middle;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    form {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      display: inline-block;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    input, button {
+      margin: 8px 0;
+      padding: 10px;
+      width: 250px;
+    }
+  </style>
 </head>
 <body>
 
@@ -42,50 +47,55 @@
     <img src="https://web.igchkshop.dpdns.org/IGC%20HK/IGC%20HK%20Banner.jpg" alt="IGC HK Banner" class="banner">
   </div>
 
-  <h1>IGC HK Control Login</h1>
+  <h1>IGC HK Login Page</h1>
 
-  <form id="loginForm" onsubmit="handleLogin(event)">
-    <input type="email" id="email" placeholder="Email" required /><br />
-    <input type="password" id="password" placeholder="Password" required /><br />
+  <form id="login-form">
+    <input type="email" id="email" placeholder="Email" required><br>
+    <input type="password" id="password" placeholder="Password" required><br>
     <button type="submit">Login</button>
   </form>
 
-  <p id="loginStatus"></p>
+  <p id="error-message" style="color:red;"></p>
+  <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
 
-  // Your Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyAS5ssOie0tu6OUYWfMdagnt592DAESyJU",
-    authDomain: "igchkadmin.firebaseapp.com",
-    projectId: "igchkadmin",
-    storageBucket: "igchkadmin.firebasestorage.app",
-    messagingSenderId: "532987962673",
-    appId: "1:532987962673:web:1aaaf1499e1ac3d7547c10"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyBL-biUfPdgOoJvqgpD-drdcCNVXERlJ6Y",
+      authDomain: "igchkwebsite.firebaseapp.com",
+      projectId: "igchkwebsite",
+      storageBucket: "igchkwebsite.firebasestorage.app",
+      messagingSenderId: "575146782620",
+      appId: "1:575146782620:web:36853d54456714d5d6e259",
+      measurementId: "G-V5EFJP1WYJ"
+    };
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-  // Login handler
-  window.handleLogin = async function(event) {
-    event.preventDefault();
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-    const status = document.getElementById("loginStatus");
-    status.textContent = "Logging in...";
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      status.textContent = `Welcome, ${userCredential.user.email}!`;
-      // TODO: Redirect or load your control dashboard page here
-    } catch (error) {
-      status.textContent = `Login failed: ${error.message}`;
-    }
-  };
-</script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
 
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        if (!user.emailVerified) {
+          alert("Please verify your email before logging in.");
+          return;
+        }
+
+        alert("Login successful!");
+        window.location.href = "dashboard.html";
+      } catch (error) {
+        document.getElementById('error-message').textContent = "Error: " + error.message;
+      }
+    });
+  </script>
 </body>
 </html>
+

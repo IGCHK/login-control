@@ -1,63 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>IGC HK Control Panel</title>
-  <style>
-    body {
-      background-color: #fdf6a6;
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      text-align: center;
-    }
-    .header-images {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 20px;
-      gap: 20px;
-    }
-    img.logo, img.banner {
-      height: 120px;
-      width: auto;
-      vertical-align: middle;
-    }
-    h1 {
-      color: #333;
-    }
-    #loginForm, #controlPanel {
-      max-width: 400px;
-      margin: 0 auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #ccc;
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-      text-align: left;
-    }
-    input, select {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      box-sizing: border-box;
-    }
-    button {
-      margin-top: 15px;
-      padding: 10px 15px;
-      cursor: pointer;
-      background-color: #0066cc;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-    #message {
-      margin-top: 10px;
-      color: red;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IGC HK Control Login</title>
+<style>
+  body {
+    background-color: #fdf6a6;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 50px;
+  }
+  input[type="email"], input[type="password"] {
+    padding: 10px;
+    font-size: 1em;
+    margin: 10px 0;
+    width: 250px;
+  }
+  button {
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+  }
+  .header-images {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    gap: 20px;
+  }
+  img.logo, img.banner {
+    height: 120px;
+    width: auto;
+  }
+</style>
 </head>
 <body>
 
@@ -66,128 +42,50 @@
     <img src="https://web.igchkshop.dpdns.org/IGC%20HK/IGC%20HK%20Banner.jpg" alt="IGC HK Banner" class="banner">
   </div>
 
-  <h1>IGC HK Control Panel</h1>
+  <h1>IGC HK Control Login</h1>
 
-  <div id="loginForm">
-    <label for="email">Email:</label>
-    <input type="email" id="email" placeholder="email@igchkshop.dpdns.org" value="email@igchkshop.dpdns.org" required>
+  <form id="loginForm" onsubmit="handleLogin(event)">
+    <input type="email" id="email" placeholder="Email" required /><br />
+    <input type="password" id="password" placeholder="Password" required /><br />
+    <button type="submit">Login</button>
+  </form>
 
-    <label for="password">Password:</label>
-    <input type="password" id="password" placeholder="Enter password" required>
+  <p id="loginStatus"></p>
 
-    <button onclick="handleLogin()">Login</button>
-    <div id="message"></div>
-  </div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
 
-  <div id="controlPanel" style="display:none;">
-    <h2>Assign File to User</h2>
+  // Your Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyAS5ssOie0tu6OUYWfMdagnt592DAESyJU",
+    authDomain: "igchkadmin.firebaseapp.com",
+    projectId: "igchkadmin",
+    storageBucket: "igchkadmin.firebasestorage.app",
+    messagingSenderId: "532987962673",
+    appId: "1:532987962673:web:1aaaf1499e1ac3d7547c10"
+  };
 
-    <label for="userSelect">Select User Email:</label>
-    <select id="userSelect"></select>
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
 
-    <label for="fileName">File Name (friendly):</label>
-    <input type="text" id="fileName" placeholder="e.g. File 1" required>
-
-    <label for="fileUrl">File URL:</label>
-    <input type="url" id="fileUrl" placeholder="https://example.com/file1" required>
-
-    <button onclick="saveUserFile()">Save Assignment</button>
-    <div id="saveMessage"></div>
-  </div>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBL-biUfPdgOoJvqgpD-drdcCNVXERlJ6Y",
-      authDomain: "igchkwebsite.firebaseapp.com",
-      projectId: "igchkwebsite",
-      storageBucket: "igchkwebsite.appspot.com",
-      messagingSenderId: "575146782620",
-      appId: "1:575146782620:web:36853d54456714d5d6e259"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const loginForm = document.getElementById('loginForm');
-    const controlPanel = document.getElementById('controlPanel');
-    const message = document.getElementById('message');
-    const saveMessage = document.getElementById('saveMessage');
-
-    // Hardcoded login credentials
-    const validEmail = "email@igchkshop.dpdns.org";
-    const validPassword = "password";
-
-    async function handleLogin() {
-      message.textContent = "";
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-
-      if (email === validEmail && password === validPassword) {
-        loginForm.style.display = "none";
-        controlPanel.style.display = "block";
-        await loadUsers();
-      } else {
-        message.textContent = "Invalid email or password.";
-      }
+  // Login handler
+  window.handleLogin = async function(event) {
+    event.preventDefault();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const status = document.getElementById("loginStatus");
+    status.textContent = "Logging in...";
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      status.textContent = `Welcome, ${userCredential.user.email}!`;
+      // TODO: Redirect or load your control dashboard page here
+    } catch (error) {
+      status.textContent = `Login failed: ${error.message}`;
     }
+  };
+</script>
 
-    async function loadUsers() {
-      saveMessage.textContent = "";
-      const userSelect = document.getElementById('userSelect');
-      userSelect.innerHTML = "<option>Loading users...</option>";
-
-      try {
-        // Assuming users collection exists with user docs keyed by email or uid
-        const usersSnapshot = await getDocs(collection(db, "users"));
-        userSelect.innerHTML = "";
-
-        if (usersSnapshot.empty) {
-          userSelect.innerHTML = "<option disabled>No users found</option>";
-          return;
-        }
-
-        usersSnapshot.forEach(docSnap => {
-          const email = docSnap.id; // user doc ID = email
-          const option = document.createElement('option');
-          option.value = email;
-          option.textContent = email;
-          userSelect.appendChild(option);
-        });
-      } catch (error) {
-        userSelect.innerHTML = "<option disabled>Error loading users</option>";
-        console.error("Error loading users:", error);
-      }
-    }
-
-    async function saveUserFile() {
-      saveMessage.textContent = "";
-      const email = document.getElementById('userSelect').value;
-      const fileName = document.getElementById('fileName').value.trim();
-      const fileUrl = document.getElementById('fileUrl').value.trim();
-
-      if (!email || !fileName || !fileUrl) {
-        saveMessage.style.color = "red";
-        saveMessage.textContent = "Please fill all fields.";
-        return;
-      }
-
-      try {
-        // Save under userFiles collection keyed by email, store friendly name + url
-        await setDoc(doc(db, "userFiles", email), {
-          fileName: fileName,
-          fileUrl: fileUrl
-        });
-        saveMessage.style.color = "green";
-        saveMessage.textContent = `File assigned to ${email} successfully!`;
-      } catch (error) {
-        saveMessage.style.color = "red";
-        saveMessage.textContent = "Failed to save assignment.";
-        console.error("Save failed:", error);
-      }
-    }
-  </script>
 </body>
 </html>

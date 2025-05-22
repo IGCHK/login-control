@@ -39,6 +39,7 @@
     }
     #login-error {
       color: red;
+      min-height: 20px;
     }
   </style>
 </head>
@@ -56,14 +57,12 @@
     </div>
 
     <div id="admin-content" style="display: none;">
-      <h2>Welcome, Admin!</h2>
-      <p>You have successfully logged in to the admin panel.</p>
+      <h2>Welcome to Admin Panel</h2>
+      <p>You have successfully logged in.</p>
     </div>
   </div>
 
-  <!-- Firebase SDK -->
   <script type="module">
-    // Import the required Firebase modules
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
     import { 
       getAuth, 
@@ -72,7 +71,7 @@
       onAuthStateChanged 
     } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
 
-    // Your web app's Firebase configuration
+    // Your Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAS5ssOie0tu6OUYWfMdagnt592DAESyJU",
       authDomain: "igchkadmin.firebaseapp.com",
@@ -95,11 +94,15 @@
     const adminPassword = document.getElementById("adminPassword");
     const loginError = document.getElementById("login-error");
 
-    // Admin email (replace with your actual admin email)
-    const ADMIN_EMAIL = "igchkadmin@yourdomain.com";
-
     // Login function
     loginBtn.addEventListener("click", async () => {
+      loginError.textContent = ""; // Clear previous errors
+      
+      if (!adminEmail.value || !adminPassword.value) {
+        loginError.textContent = "Please enter both email and password";
+        return;
+      }
+
       try {
         const userCredential = await signInWithEmailAndPassword(
           auth,
@@ -107,17 +110,14 @@
           adminPassword.value
         );
         
-        // Check if logged in user is the admin
-        if (userCredential.user.email === ADMIN_EMAIL) {
-          loginContainer.style.display = "none";
-          adminContent.style.display = "block";
-          logoutBtn.style.display = "block";
-        } else {
-          await signOut(auth);
-          loginError.textContent = "Access denied. Not an admin.";
-        }
+        // Successfully logged in
+        loginContainer.style.display = "none";
+        adminContent.style.display = "block";
+        logoutBtn.style.display = "block";
+        
       } catch (error) {
-        loginError.textContent = error.message;
+        console.error("Login error:", error);
+        loginError.textContent = "Login failed. Please check your credentials.";
       }
     });
 
@@ -125,27 +125,25 @@
     logoutBtn.addEventListener("click", async () => {
       try {
         await signOut(auth);
-        loginContainer.style.display = "block";
-        adminContent.style.display = "none";
-        logoutBtn.style.display = "none";
-        adminEmail.value = "";
-        adminPassword.value = "";
-        loginError.textContent = "";
       } catch (error) {
         console.error("Logout error:", error);
       }
     });
 
-    // Check auth state on page load
+    // Check auth state on page load and changes
     onAuthStateChanged(auth, (user) => {
-      if (user && user.email === ADMIN_EMAIL) {
+      if (user) {
+        // User is signed in
         loginContainer.style.display = "none";
         adminContent.style.display = "block";
         logoutBtn.style.display = "block";
       } else {
+        // User is signed out
         loginContainer.style.display = "block";
         adminContent.style.display = "none";
         logoutBtn.style.display = "none";
+        adminEmail.value = "";
+        adminPassword.value = "";
       }
     });
   </script>

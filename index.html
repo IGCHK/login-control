@@ -45,7 +45,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const adminEmail = "your-admin@email.com"; // Replace with your actual admin email
+    const adminEmail = "admin@igchkshop.dpdns.org"; // Replace with your actual admin email
 
     onAuthStateChanged(auth, async (user) => {
       if (user && user.email === adminEmail) {
@@ -113,3 +113,4 @@
   </script>
 </body>
 </html>
+
